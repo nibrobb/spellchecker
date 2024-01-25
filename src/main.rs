@@ -73,10 +73,12 @@ fn spellcheck(input: &String, wordlist: &Vec<&str>) {
 
     for word in words {
         match wordlist.binary_search(&word) {
-            Ok(_) => {}
+            Ok(_) => {},
             Err(_) => {
                 let (dist, sug_word) = result(word);
-                println!("Suggestion: change \"{word}\" to \"{sug_word}\", distance: {dist}");
+                if dist > 0 {
+                    println!("Suggestion: change \"{word}\" to \"{sug_word}\", distance: {dist}");
+                }
             }
         }
     }
