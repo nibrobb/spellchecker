@@ -4,7 +4,7 @@ use std::{
     fs::File,
     io::{self, BufRead, BufReader, Write},
     path::Path,
-    process::ExitCode,
+    process::ExitCode, env,
 };
 
 enum QReturns {
@@ -53,7 +53,9 @@ fn spellcheck(input: &String, wordlist: &Vec<&str>) {
         c.is_alphabetic() || c == '\''
     }
 
-    let words: Vec<&str> = input
+    let lowercased_input = input.to_lowercase();
+
+    let words: Vec<&str> = lowercased_input
         .split(',')
         .flat_map(|s| s.split_whitespace())
         .map(|s| s.trim_matches(|c| !is_alpha_or_apostrophe(c)))
@@ -69,7 +71,6 @@ fn spellcheck(input: &String, wordlist: &Vec<&str>) {
         (min_dist, min_word)
     };
 
-    println!("input was {:?}", words);
     for word in words {
         match wordlist.binary_search(&word) {
             Ok(_) => {}
@@ -82,11 +83,19 @@ fn spellcheck(input: &String, wordlist: &Vec<&str>) {
 }
 
 fn main() -> ExitCode {
-    // TODO: Optionally accept word-list file via command line arguments
-    let lines = lines_from_file("./data/words_alpha.txt");
+    let args: Vec<_> = env::args().collect();
+
+    let mut filename = "./data/words_alpha.txt";
+
+    if args.len() == 2 {
+        filename = &args[1];
+    }
+
+    let lines = lines_from_file(filename);
 
     let mut input = String::new();
 
+    // TODO: Add option to turn loop off/on for either single pass taking stdin or acting as REPL
     loop {
         prompt();
         match read_query(&mut input) {
